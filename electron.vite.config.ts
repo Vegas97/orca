@@ -1,3 +1,4 @@
+import { customPreviewBanner } from './config/build-plugins/custom-build-manifest'
 import { readCustomBuildInfo } from './config/build-plugins/custom-build-info'
 import { markdownParserAliases } from './config/build-plugins/markdown-parser-exports'
 import { createRequire } from 'node:module'
@@ -6,7 +7,6 @@ import { defineConfig, type UserConfig } from 'electron-vite'
 import type { Plugin, Rollup } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { createBootstrapFatalExitBanner } from './config/build-plugins/bootstrap-fatal-exit-banner'
 import {
   createSandboxedScriptBundlesPlugin,
   ONE_BYTE_UNMINIFIED_OUTPUT
@@ -201,7 +201,7 @@ function createMainBootstrapPostBanner(chunk: Rollup.RenderedChunk): string {
     throw new Error('Main startup must stay in index.js so __dirname resolves app assets')
   }
   // Source guards run after Rollup’s require prelude, too late to handle missing bootstrap dependencies.
-  return createBootstrapFatalExitBanner() + createStartupDiagnosticsBanner(chunk.fileName)
+  return customPreviewBanner(createStartupDiagnosticsBanner(chunk.fileName))
 }
 
 // Dev-only unminified main bundle exposes function names in V8 profiles; releases and pnpm build never read this flag.

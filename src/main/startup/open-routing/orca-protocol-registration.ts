@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../../shared/custom-build'
 import type { App } from 'electron'
 
 /**
@@ -9,6 +10,9 @@ export function registerOrcaProtocolClient(
   app: Pick<App, 'isPackaged' | 'isDefaultProtocolClient' | 'setAsDefaultProtocolClient'>,
   options: { platform: NodeJS.Platform; desktopLaunch: boolean }
 ): boolean {
+  if (getCustomBuildInfo()?.profileMode === 'interactive-preview') {
+    return false
+  }
   if (options.platform !== 'win32' || !app.isPackaged || !options.desktopLaunch) {
     return false
   }

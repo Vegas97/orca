@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../shared/custom-build'
 import { execFile } from 'node:child_process'
 
 const KEYCHAIN_COMMAND_TIMEOUT_MS = 3_000
@@ -22,6 +23,9 @@ export function isKeychainNotFoundError(error: unknown): boolean {
 }
 
 export function execSecurityCommand(args: string[]): Promise<SecurityCommandResult> {
+  if (getCustomBuildInfo()?.profileMode === 'interactive-preview') {
+    return Promise.reject(new Error('Account changes are unavailable in the interactive preview.'))
+  }
   return new Promise((resolve, reject) => {
     let settled = false
     let child: ReturnType<typeof execFile> | undefined
@@ -79,6 +83,9 @@ export async function readKeychainPassword(
   service: string,
   account: string
 ): Promise<string | null> {
+  if (getCustomBuildInfo()?.profileMode === 'interactive-preview') {
+    return null
+  }
   if (process.platform !== 'darwin') {
     return null
   }

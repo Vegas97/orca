@@ -42,7 +42,10 @@ function observationForResolvedRun(
   agent: string,
   queued: AgentSessionSendResult | null = null
 ): AutomationRunCompletionObservation | null {
-  if (queued && 'queued' in queued) {
+  const rejectedSendKeptAsDraft =
+    submission?.dispatchState === 'rejected' &&
+    submission.keptAsQueuedMessageId === submission.clientMessageId
+  if (queued && 'queued' in queued && !rejectedSendKeptAsDraft) {
     return queued.queued.state === 'withdrawn' || queued.queued.state === 'returned'
       ? {
           status: 'dispatch_failed',

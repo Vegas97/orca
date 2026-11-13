@@ -1,3 +1,4 @@
+import { customPreviewRpcOptions } from './custom-preview-rpc-options'
 import { app, type BrowserWindow } from 'electron'
 import { ORCA_LAYOUT_OWNER_IS_MAIN } from '../../../shared/layout-owner-switch'
 import { placeUnshownLiveTerminalsBestEffort } from '../../runtime/terminal/adoption/unshown-live-terminal-placement'
@@ -97,7 +98,6 @@ function installRuntimeRpc(
     throw new Error(`Invalid ORCA_E2E_RUNTIME_WS_PORT value: ${requestedE2EWsPort}`)
   }
   // STA-1511: separate dev port from packaged Orca so pairing/repro URLs do not fall back unpredictably.
-  const devWsPort = !app.isPackaged && !isE2E ? 6769 : undefined
   const pinnedBindHost = resolveServePinnedBindHost({
     orcadSidecar: isOrcadSidecarLaunch(),
     serveOptions
@@ -120,7 +120,7 @@ function installRuntimeRpc(
         }
       : {}),
     ...(isE2E ? { wsPort: e2eWsPort } : {}),
-    ...(devWsPort !== undefined ? { wsPort: devWsPort } : {}),
+    ...customPreviewRpcOptions(app.isPackaged, isE2E),
     ...(serveOptions?.wsPort !== undefined
       ? {
           wsPort: serveOptions.wsPort,

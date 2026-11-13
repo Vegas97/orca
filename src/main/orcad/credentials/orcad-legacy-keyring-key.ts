@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../../shared/custom-build'
 /** Read hourly-build keyring keys for one-time file migration without modifying the keyring. */
 import { runProcess } from '@orca/process-host'
 import type { ProcessResult, ProcessSpec } from '@orca/process-host/process-spec'
@@ -24,6 +25,9 @@ export function resolveOrcadLegacyKeyringReader(
   env: NodeJS.ProcessEnv = process.env,
   runner: (spec: ProcessSpec) => Promise<ProcessResult> = runProcess
 ): OrcadLegacyKeyringReader | null {
+  if (getCustomBuildInfo()?.profileMode === 'interactive-preview') {
+    return null
+  }
   const argv = lookupArgv(platform, env)
   if (!argv) {
     return null

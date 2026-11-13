@@ -927,3 +927,26 @@ function findInstalledMacSigningIdentity(keychainFile) {
   } catch {}
   return null
 }
+
+// The preview keeps the same identity across local and disposable-runner builds.
+if (process.env.ORCA_CUSTOM_BUILD_MANIFEST) {
+  const customManifest = JSON.parse(
+    readFileSync(resolve(process.env.ORCA_CUSTOM_BUILD_MANIFEST), 'utf8')
+  )
+  if ((customManifest.info ?? customManifest).profileMode === 'interactive-preview') {
+    module.exports.appId = 'com.vegas97.orca.interactive-preview'
+    module.exports.productName = 'Orca Custom Preview'
+    module.exports.extraMetadata = {
+      ...module.exports.extraMetadata,
+      productName: 'Orca Custom Preview'
+    }
+    module.exports.protocols = []
+    module.exports.mac.extendInfo = {
+      ...module.exports.mac.extendInfo,
+      CFBundleName: 'Orca Custom Preview',
+      CFBundleDisplayName: 'Orca Custom Preview',
+      CFBundleURLTypes: [],
+      CFBundleDocumentTypes: []
+    }
+  }
+}

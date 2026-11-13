@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../shared/custom-build'
 import type { BrowserWindow } from 'electron'
 import type {
   LinuxPackageInstallInstructions,
@@ -48,18 +49,35 @@ export function installRemoteServerUpdate(runtimeId: string): RemoteServerUpdate
 }
 
 export function checkForUpdates(): void {
+  if (getCustomBuildInfo()) {
+    return
+  }
   updater.checkForUpdates()
 }
 
 export function checkForUpdatesFromMenu(options?: UpdateCheckOptions): void {
+  if (getCustomBuildInfo()) {
+    if (options?.localBuild) {
+      throw new Error(
+        'This isolated preview cannot apply signed app updates. Install a qualified Custom build before using in-app build switching.'
+      )
+    }
+    return
+  }
   updater.checkForUpdatesFromMenu(options)
 }
 
 export function downloadUpdate(): void {
+  if (getCustomBuildInfo()) {
+    return
+  }
   updater.downloadUpdate()
 }
 
 export function quitAndInstall(): void {
+  if (getCustomBuildInfo()) {
+    return
+  }
   updater.quitAndInstall()
 }
 
@@ -79,6 +97,9 @@ export async function listAvailableReleaseBuilds(
   channel: ReleaseChannel,
   options?: ReleaseBuildListOptions
 ): Promise<ReleaseBuild[]> {
+  if (getCustomBuildInfo()) {
+    return []
+  }
   return updater.listAvailableReleaseBuilds(channel, options)
 }
 
@@ -94,5 +115,8 @@ export function setupAutoUpdater(
   mainWindow: BrowserWindow | null,
   opts?: UpdaterSetupOptions
 ): void {
+  if (getCustomBuildInfo()) {
+    return
+  }
   updater.setupAutoUpdater(mainWindow, opts)
 }
