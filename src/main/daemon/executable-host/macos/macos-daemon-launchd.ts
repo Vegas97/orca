@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../../../shared/custom-build'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -80,7 +81,11 @@ function buildMacDaemonLaunchJob(
     KeepAlive: false,
     AbandonProcessGroup: true,
     // Associate plist-launched jobs with Orca for Local Network access.
-    AssociatedBundleIdentifiers: [LOCAL_BUILD_COMPATIBILITY_CONTRACT.appId],
+    AssociatedBundleIdentifiers: [
+      getCustomBuildInfo()?.profileMode === 'interactive-preview'
+        ? 'com.vegas97.orca.interactive-preview'
+        : LOCAL_BUILD_COMPATIBILITY_CONTRACT.appId
+    ],
     ProcessType: 'Interactive',
     // launchd disables cloud-file downloads for jobs unless asked; shells need them like Terminal.app.
     MaterializeDatalessFiles: true,
