@@ -1,3 +1,4 @@
+import { getCustomBuildInfo } from '../../../shared/custom-build'
 import { spawn, spawnSync } from 'node:child_process'
 import { RuntimeClientError } from '../runtime-client-error'
 import { isHostShuttingDown } from '../../startup/quit/host-shutdown-state'
@@ -12,7 +13,10 @@ import type {
   ComputerUsePermissionStatusResult
 } from '../../../shared/computer-use-permissions-types'
 
-const DEFAULT_COMPUTER_USE_BUNDLE_ID = 'com.stablyai.orca.computer-use'
+const DEFAULT_COMPUTER_USE_BUNDLE_ID =
+  getCustomBuildInfo()?.profileMode === 'interactive-preview'
+    ? 'com.vegas97.orca.interactive-preview.computer-use'
+    : 'com.stablyai.orca.computer-use'
 
 // One setup-helper spawn per 5s across every permission, on the monotonic clock; claimed synchronously.
 const SETUP_HELPER_LAUNCH_WINDOW_MS = 5_000
@@ -247,13 +251,16 @@ async function resetComputerUsePermissionsAsync(): Promise<ComputerUsePermission
 }
 
 function closeExistingPermissionHelpers(): void {
-  // Preserve concurrent status probes when replacing permission-setup helpers.
-  const setupHelperPatterns = [
-    'orca-computer-use-macos[[:space:]]+--permission([[:space:]]|$)',
-    'orca-computer-use-macos[[:space:]]+--permissions([[:space:]]|$)'
-  ]
-  for (const pattern of setupHelperPatterns) {
-    spawnSync('/usr/bin/pkill', ['-f', pattern], {
+  const helper = resolveMacOSComputerUseAppPath()
+  if (!helper) {
+    return
+  }
+  const executable = `${helper}/Contents/MacOS/orca-computer-use-macos`.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&'
+  )
+  for (const option of ['permission', 'permissions']) {
+    spawnSync('/usr/bin/pkill', ['-f', `${executable}[[:space:]]+--${option}([[:space:]]|$)`], {
       stdio: 'ignore'
     })
   }

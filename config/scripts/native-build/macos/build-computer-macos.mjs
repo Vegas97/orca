@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { chmodSync, copyFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const repoRoot = path.resolve(import.meta.dirname, '../../../..')
@@ -14,8 +14,17 @@ const entitlementsPath = path.join(
   'build',
   'entitlements.computer-use.mac.plist'
 )
-const bundleId = process.env.ORCA_COMPUTER_MACOS_BUNDLE_ID ?? 'com.stablyai.orca.computer-use'
-const displayName = 'Orca Computer Use'
+const customManifest = process.env.ORCA_CUSTOM_BUILD_MANIFEST
+  ? JSON.parse(readFileSync(process.env.ORCA_CUSTOM_BUILD_MANIFEST, 'utf8'))
+  : null
+const interactivePreview =
+  (customManifest?.info ?? customManifest)?.profileMode === 'interactive-preview'
+const bundleId =
+  process.env.ORCA_COMPUTER_MACOS_BUNDLE_ID ??
+  (interactivePreview
+    ? 'com.vegas97.orca.interactive-preview.computer-use'
+    : 'com.stablyai.orca.computer-use')
+const displayName = interactivePreview ? 'Orca Custom Preview Computer Use' : 'Orca Computer Use'
 const signingIdentity = resolveSigningIdentity()
 const universalTriples = ['arm64-apple-macosx', 'x86_64-apple-macosx']
 

@@ -1,6 +1,10 @@
+import { getCustomBuildInfo } from '../../shared/custom-build'
 import { shell } from 'electron'
 
-const MACOS_PACKAGED_BUNDLE_ID = 'com.stablyai.orca'
+const MACOS_PACKAGED_BUNDLE_ID =
+  getCustomBuildInfo()?.profileMode === 'interactive-preview'
+    ? 'com.vegas97.orca.interactive-preview'
+    : 'com.stablyai.orca'
 const MACOS_NOTIFICATION_SETTINGS_URL =
   'x-apple.systempreferences:com.apple.Notifications-Settings.extension'
 

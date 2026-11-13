@@ -941,6 +941,7 @@ if (process.env.ORCA_CUSTOM_BUILD_MANIFEST) {
       productName: 'Orca Custom Preview'
     }
     module.exports.protocols = []
+    module.exports.mac.fileAssociations = []
     module.exports.mac.extendInfo = {
       ...module.exports.mac.extendInfo,
       CFBundleName: 'Orca Custom Preview',
